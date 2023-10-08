@@ -25,20 +25,18 @@ export async function createQuestion(params: CreateQuestionParams) {
   try {
     connectToDatabase();
 
-    const { title, content, tags, author } = params;
+    const { title, content, tags, author, path } = params;
 
     // Create the question
-
     const question = await Question.create({
       title,
       content,
-      tags,
       author,
     });
 
     const tagDocuments = [];
 
-    // create the tags or get them if they already exists
+    // Create or retrieve tag documents
     for (const tag of tags) {
       const existingTag = await Tag.findOneAndUpdate(
         { name: { $regex: new RegExp(`^${tag}$`, "i") } },
@@ -49,12 +47,16 @@ export async function createQuestion(params: CreateQuestionParams) {
       tagDocuments.push(existingTag._id);
     }
 
+    // Update the question's tags field using $push and $each
     await Question.findByIdAndUpdate(question._id, {
       $push: { tags: { $each: tagDocuments } },
     });
 
-    // Create an interaction record for the user's ask question action
+    // Create an Interaction record for the user's ask_question action
 
-    // increment the user's reputation
-  } catch (error) {}
+    // Increment author's reputation by +5 for creating a question
+  } catch (error) {
+    console.error("Error creating question:", error);
+    throw error;
+  }
 }
