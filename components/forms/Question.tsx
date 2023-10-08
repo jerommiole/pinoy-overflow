@@ -1,9 +1,8 @@
 "use client";
-
 import React, { useRef, useState } from "react";
 import { Editor } from "@tinymce/tinymce-react";
-import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -15,16 +14,24 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Button } from "../ui/button";
 import { QuestionsSchema } from "@/lib/validations";
-import * as z from "zod";
 import { Badge } from "../ui/badge";
 import Image from "next/image";
+import { createQuestion } from "@/lib/actions/question.action";
+import { useRouter } from "next/navigation";
 
 const type: any = "create";
 
-const Question = () => {
+interface Props {
+  mongoUserId: string;
+}
+
+const Question = ({ mongoUserId }: Props) => {
   const editorRef = useRef(null);
-  const [isSubmmitting, setIsSubmmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  // const pathname = usePathname();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof QuestionsSchema>>({
@@ -37,15 +44,24 @@ const Question = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof QuestionsSchema>) {
-    setIsSubmmitting(true);
+  async function onSubmit(values: z.infer<typeof QuestionsSchema>) {
+    setIsSubmitting(true);
+
     try {
       // make an async call to your API - create a question
       // contain all form data
-      // navigate to home page
+
+      await createQuestion({
+        title: values.title,
+        content: values.explanation,
+        tags: values.tags,
+        author: JSON.parse(mongoUserId),
+      });
+
+      router.push("/");
     } catch (error) {
     } finally {
-      setIsSubmmitting(false);
+      setIsSubmitting(false);
     }
   }
 
@@ -127,6 +143,8 @@ const Question = () => {
                     // @ts-ignore
                     editorRef.current = editor;
                   }}
+                  onBlur={field.onBlur}
+                  onEditorChange={(content) => field.onChange(content)}
                   initialValue=""
                   init={{
                     height: 350,
@@ -214,14 +232,13 @@ const Question = () => {
         <Button
           type="submit"
           className="primary-gradient w-fit !text-light-900"
-          disabled={isSubmmitting}
+          disabled={isSubmitting}
         >
-          {isSubmmitting ? (
-            <>{type === "edit" ? "Editing..." : "Posting..."}</>
+          {isSubmitting ? (
+            <>{type === "Edit" ? "Editing..." : "Posting..."}</>
           ) : (
-            <>{type === "edit" ? "Edit" : "Ask a question"}</>
+            <>{type === "Edit" ? "Edit Question" : "Ask a Question"}</>
           )}
-          Submit
         </Button>
       </form>
     </Form>
