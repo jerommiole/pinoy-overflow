@@ -5,6 +5,7 @@ import Question from "@/database/question.model";
 import Tag from "@/database/tag.model";
 import { CreateQuestionParams, GetQuestionsParams } from "./shared.types";
 import User from "@/database/user.model";
+import { revalidatePath } from "next/cache";
 
 export async function getQuestions(params: GetQuestionsParams) {
   try {
@@ -12,7 +13,8 @@ export async function getQuestions(params: GetQuestionsParams) {
 
     const questions = await Question.find({})
       .populate({ path: "tags", model: Tag })
-      .populate({ path: "author", model: User });
+      .populate({ path: "author", model: User })
+      .sort({ createdAt: -1 });
 
     return { questions };
   } catch (error) {
@@ -25,7 +27,7 @@ export async function createQuestion(params: CreateQuestionParams) {
   try {
     connectToDatabase();
 
-    const { title, content, tags, author } = params;
+    const { title, content, tags, author, path } = params;
 
     // Create the question
     const question = await Question.create({
@@ -55,6 +57,7 @@ export async function createQuestion(params: CreateQuestionParams) {
     // Create an Interaction record for the user's ask_question action
 
     // Increment author's reputation by +5 for creating a question
+    // revalidatePath(path);
   } catch (error) {
     console.error("Error creating question:", error);
     throw error;
