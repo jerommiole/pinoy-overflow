@@ -12,6 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 
+// @ts-ignore
 const Page = async ({ params, searchParams }) => {
   const { userId: clerkId } = auth();
 
