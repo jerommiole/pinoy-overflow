@@ -14,7 +14,7 @@ const Navbar = () => {
           src="/assets/images/site-logo-ph.png"
           width={23}
           height={23}
-          alt="DevFlow"
+          alt="Pinoy Overflow Icon"
         />
 
         <p className="h2-bold font-spaceGrotesk text-dark-100 dark:text-light-900 max-sm:hidden">
