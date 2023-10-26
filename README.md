@@ -1,36 +1,22 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Pinoy Overflow
 
-## Getting Started
+### I'm excited to introduce you to my latest creation, Pinoy Overflow! 
+It's not just a website; it's a community-driven platform designed to empower newcomers to the world of web development. Pinoy Overflow serves as a "Stack Overflow" for those seeking answers and guidance in their web development journey.
 
-First, run the development server:
+![1](https://github.com/jerommiole/pinoy-overflow/assets/8807678/97caec4b-5fc1-4abe-9aed-1c3114ba5cfa)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Key Features:
+- React and TypeScript: These technologies ensure a smooth and interactive user experience, making it easy to browse and ask questions.
+- Next.js: With Next.js, the site is not only fast but also optimized for search engines, helping users find answers to their web development queries.
+- Tailwind CSS: The clean and modern design, thanks to Tailwind CSS, enhances the overall usability of Pinoy Overflow.
+- MongoDB: MongoDB helps manage user data and content effectively, making it a valuable resource for web development queries.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+![2](https://github.com/jerommiole/pinoy-overflow/assets/8807678/e5958f8f-03b0-4e1a-835a-e94a8be7de54)
+![3](https://github.com/jerommiole/pinoy-overflow/assets/8807678/76fd8d59-b7ac-409e-9194-7ae2977e7a98)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Dark Mode Theme
+![4](https://github.com/jerommiole/pinoy-overflow/assets/8807678/72ff13d2-42b8-41f7-98a7-99602681122f)
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Pinoy Overflow is more than just a website; it's a vibrant community of web enthusiasts helping each other grow. Whether you're a newbie or an experienced developer, you'll find a welcoming space to ask questions, share knowledge, and collaborate.
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Join me in embracing the power of community-driven learning and development. Start your journey with Pinoy Overflow today!
