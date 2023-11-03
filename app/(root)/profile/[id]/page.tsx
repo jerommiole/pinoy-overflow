@@ -100,8 +100,8 @@ const Page = async ({ params, searchParams }: URLProps) => {
                 clerkId={clerkId}
               />
             </TabsContent>
-            <TabsContent value="answers">
-              <AnswersTab />
+            <TabsContent value="answers" className="flex w-full flex-col gap-6">
+              <AnswersTab userId={userInfo.user._id} clerkId={clerkId} />
             </TabsContent>
           </Tabs>
         </Tabs>
