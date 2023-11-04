@@ -1,6 +1,5 @@
-import { Link } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import Link from "next/link";
 
 interface ProfileLinkProps {
   imgUrl: string;
@@ -12,6 +11,7 @@ const ProfileLink = ({ imgUrl, href, title }: ProfileLinkProps) => {
   return (
     <div className="flex-center gap-1">
       <Image src={imgUrl} alt="icon" width={20} height={20} />
+
       {href ? (
         <Link
           href={href}

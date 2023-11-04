@@ -19,9 +19,8 @@ import { QuestionsSchema } from "@/lib/validations";
 import { Badge } from "../ui/badge";
 import Image from "next/image";
 import { createQuestion, editQuestion } from "@/lib/actions/question.action";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useTheme } from "@/context/ThemeProvider";
-import { parse } from "path";
 
 interface Props {
   type?: string;
@@ -36,17 +35,18 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const parsedQuestionDetails = JSON.parse(questionDetails || "");
+  const parsedQuestionDetails =
+    questionDetails && JSON.parse(questionDetails || "");
 
-  const groupTags = parsedQuestionDetails.tags.map((tag: string) => tag.name);
+  const groupedTags = parsedQuestionDetails?.tags.map((tag: any) => tag.name);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof QuestionsSchema>>({
     resolver: zodResolver(QuestionsSchema),
     defaultValues: {
-      title: parsedQuestionDetails.title || "",
-      explanation: parsedQuestionDetails.content || "",
-      tags: groupTags || [],
+      title: parsedQuestionDetails?.title || "",
+      explanation: parsedQuestionDetails?.content || "",
+      tags: groupedTags || [],
     },
   });
 
@@ -62,6 +62,7 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
           content: values.explanation,
           path: pathname,
         });
+
         router.push(`/question/${parsedQuestionDetails._id}`);
       } else {
         await createQuestion({
@@ -75,7 +76,6 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
         router.push("/");
       }
     } catch (error) {
-      console.log(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -95,7 +95,7 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
         if (tagValue.length > 15) {
           return form.setError("tags", {
             type: "required",
-            message: "Tag must be less than 15 characters",
+            message: "Tag must be less than 15 characters.",
           });
         }
 
@@ -115,6 +115,7 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
 
     form.setValue("tags", newTags);
   };
+
   return (
     <Form {...form}>
       <form
@@ -149,7 +150,7 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
           render={({ field }) => (
             <FormItem className="flex w-full flex-col gap-3">
               <FormLabel className="paragraph-semibold text-dark400_light800">
-                Detailed expalanation of your problem{" "}
+                Detailed explanation of your problem{" "}
                 <span className="text-primary-500">*</span>
               </FormLabel>
               <FormControl className="mt-3.5">
@@ -161,7 +162,7 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
                   }}
                   onBlur={field.onBlur}
                   onEditorChange={(content) => field.onChange(content)}
-                  initialValue={parsedQuestionDetails.content || ""}
+                  initialValue={parsedQuestionDetails?.content || ""}
                   init={{
                     height: 350,
                     menubar: false,
@@ -176,13 +177,11 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
                       "anchor",
                       "searchreplace",
                       "visualblocks",
-                      "code",
+                      "codesample",
                       "fullscreen",
                       "insertdatetime",
                       "media",
                       "table",
-                      "paste",
-                      "codesample",
                     ],
                     toolbar:
                       "undo redo | " +
@@ -218,6 +217,7 @@ const Question = ({ type, mongoUserId, questionDetails }: Props) => {
                     placeholder="Add tags..."
                     onKeyDown={(e) => handleInputKeyDown(e, field)}
                   />
+
                   {field.value.length > 0 && (
                     <div className="flex-start mt-2.5 gap-2.5">
                       {field.value.map((tag: any) => (
