@@ -4,9 +4,12 @@ import Filter from "@/components/shared/Filter";
 import { getAllUsers } from "@/lib/actions/user.action";
 import Link from "next/link";
 import UserCard from "@/components/cards/UserCard";
+import { SearchParamsProps } from "@/types";
 
-const Page = async () => {
-  const result = await getAllUsers({});
+const Page = async ({ searchParams }: SearchParamsProps) => {
+  const result = await getAllUsers({
+    searchQuery: searchParams.q,
+  });
 
   return (
     <>
@@ -31,7 +34,7 @@ const Page = async () => {
         {result.users.length > 0 ? (
           result.users.map((user) => <UserCard key={user._id} user={user} />)
         ) : (
-          <div className="paragraph-regular text-dark200_light800 mx-auto max-w-4xl text-center">
+          <div className="paragraph-regular text-dark200_light800 mx-auto max-w-3xl text-center">
             <p>No users found</p>
             <Link href="/sign-up" className="mt-1 font-bold text-accent-blue">
               Join to be the first!
