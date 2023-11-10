@@ -4,18 +4,19 @@ import NoResult from "@/components/shared/NoResult";
 import LocalSearchbar from "@/components/shared/search/LocalSearchbar";
 import { QuestionFilters } from "@/constants/filter";
 import { getSavedQuestions } from "@/lib/actions/user.action";
+import { SearchParamsProps } from "@/types";
 import { auth } from "@clerk/nextjs";
 
-export default async function Home() {
+export default async function Home({ searchParams }: SearchParamsProps) {
   const { userId } = auth();
 
   if (!userId) return null;
 
   const result = await getSavedQuestions({
     clerkId: userId,
+    searchQuery: searchParams.q,
+    filter: searchParams.filter,
   });
-
-  console.log(result.questions);
 
   return (
     <>
@@ -33,7 +34,6 @@ export default async function Home() {
         <Filter
           filters={QuestionFilters}
           otherClasses="min-h-[56px] sm:min-w-[170px]"
-          containerClasses="hidden max-md:flex"
         />
       </div>
 
