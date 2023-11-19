@@ -156,13 +156,11 @@ const Answer = ({ question, questionId, authorId }: Props) => {
                         "anchor",
                         "searchreplace",
                         "visualblocks",
-                        "code",
+                        "codesample",
                         "fullscreen",
                         "insertdatetime",
                         "media",
                         "table",
-                        "paste",
-                        "codesample",
                       ],
                       toolbar:
                         "undo redo | " +
@@ -179,6 +177,7 @@ const Answer = ({ question, questionId, authorId }: Props) => {
               </FormItem>
             )}
           />
+
           <div className="flex justify-end">
             <Button
               type="submit"
