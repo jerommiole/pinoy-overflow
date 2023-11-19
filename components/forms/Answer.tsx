@@ -29,6 +29,8 @@ const Answer = ({ question, questionId, authorId }: Props) => {
   const pathname = usePathname();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [isSubmittingAI, setIsSubmittingAI] = useState(false);
+
   const { mode } = useTheme();
   const editorRef = useRef(null);
   const form = useForm<z.infer<typeof AnswerSchema>>({
@@ -62,6 +64,39 @@ const Answer = ({ question, questionId, authorId }: Props) => {
     }
   };
 
+  const generateAIAnswer = async () => {
+    if (!authorId) return;
+
+    setIsSubmittingAI(true);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/chatgpt`,
+        {
+          method: "POST",
+          body: JSON.stringify({ question }),
+        }
+      );
+
+      const aiAnswer = await response.json();
+
+      // Convert plain text to HTML format
+
+      const formattedAnswer = aiAnswer.reply.replace(/\n/g, "<br />");
+
+      if (editorRef.current) {
+        const editor = editorRef.current as any;
+        editor.setContent(formattedAnswer);
+      }
+
+      // Toast...
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSubmittingAI(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
@@ -70,16 +105,22 @@ const Answer = ({ question, questionId, authorId }: Props) => {
         </h4>
         <Button
           className="btn light-border-2 gap-1.5 rounded-md px-4 py-2.5 text-primary-500 shadow-none dark:text-primary-500"
-          onClick={() => {}}
+          onClick={generateAIAnswer}
         >
-          <Image
-            src="/assets/icons/stars.svg"
-            alt="star"
-            width={12}
-            height={12}
-            className="object-contain"
-          />
-          Generate an AI answer
+          {isSubmittingAI ? (
+            <>Generating...</>
+          ) : (
+            <>
+              <Image
+                src="/assets/icons/stars.svg"
+                alt="star"
+                width={12}
+                height={12}
+                className="object-contain"
+              />
+              Generate AI Answer
+            </>
+          )}
         </Button>
       </div>
       <Form {...form}>
@@ -115,13 +156,11 @@ const Answer = ({ question, questionId, authorId }: Props) => {
                         "anchor",
                         "searchreplace",
                         "visualblocks",
-                        "code",
+                        "codesample",
                         "fullscreen",
                         "insertdatetime",
                         "media",
                         "table",
-                        "paste",
-                        "codesample",
                       ],
                       toolbar:
                         "undo redo | " +
@@ -138,6 +177,7 @@ const Answer = ({ question, questionId, authorId }: Props) => {
               </FormItem>
             )}
           />
+
           <div className="flex justify-end">
             <Button
               type="submit"
