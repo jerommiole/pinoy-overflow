@@ -6,6 +6,11 @@ import Link from "next/link";
 import NoResult from "@/components/shared/NoResult";
 import { SearchParamsProps } from "@/types";
 import Pagination from "@/components/shared/Pagination";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Tags | Pinoy Overflow",
+};
 
 const Page = async ({ searchParams }: SearchParamsProps) => {
   const result = await getAllTags({
