@@ -10,7 +10,7 @@ import { auth } from "@clerk/nextjs";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Collection | Pinoy Overflow",
+  title: "Collections | Pinoy Overflow",
 };
 
 export default async function Home({ searchParams }: SearchParamsProps) {
