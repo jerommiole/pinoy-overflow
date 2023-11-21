@@ -8,7 +8,17 @@ import { Button } from "@/components/ui/button";
 import { HomePageFilters } from "@/constants/filter";
 import { getQuestions } from "@/lib/actions/question.action";
 import { SearchParamsProps } from "@/types";
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Home | Pinoy Overflow",
+  description:
+    "A community-driven platform for asking and answering programming questions. Get help, share knowlede, and collaborate with developers from around the world. Explore topics in web development, mobile app development, algorithms, data structures, and more.",
+  icons: {
+    icon: "/assets/images/favicon.ico",
+  },
+};
 
 export default async function Home({ searchParams }: SearchParamsProps) {
   const result = await getQuestions({
