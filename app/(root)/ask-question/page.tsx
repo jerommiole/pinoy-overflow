@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: "Ask Question | Pinoy Overflow",
+  title: "Ask a Question | Pinoy Overflow",
 };
 
 const Page = async () => {
