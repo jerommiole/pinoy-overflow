@@ -42,7 +42,7 @@ body {
   }
 
   .primary-gradient {
-    background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
+    background: linear-gradient(129deg, #2986ff 0%, #6babff 100%);
   }
 
   .dark-gradient {
@@ -76,7 +76,7 @@ body {
 }
 
 .primary-text-gradient {
-  background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%);
+  background: linear-gradient(129deg, #2986ff 0%, #6babff 100%);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -125,7 +125,7 @@ code {
   hyphens: auto;
 
   padding: 2px;
-  color: #ff7000 !important;
+  color: #2986ff !important;
 }
 
 .markdown pre {
@@ -144,7 +144,7 @@ code {
 
 /* Clerk */
 .cl-internal-b3fm6y {
-  background: linear-gradient(129deg, #ff7000 0%, #e2995f 100%) !important;
+  background: linear-gradient(129deg, #2986ff 0%, #6babff 100%) !important;
 }
 
 .hash-span {
