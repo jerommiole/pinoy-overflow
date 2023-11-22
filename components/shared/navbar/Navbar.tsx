@@ -18,7 +18,8 @@ const Navbar = () => {
         />
 
         <p className="h2-bold font-spaceGrotesk text-dark-100 dark:text-light-900 max-sm:hidden">
-          Pinoy <span className="text-primary-500">Overflow</span>
+          <span className="text-primary-500">Pinoy</span>{" "}
+          <span className="text-red">Overflow</span>
         </p>
       </Link>
 
