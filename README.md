@@ -1,6 +1,6 @@
 # Pinoy Overflow
 
-### I'm excited to introduce you to my latest creation, Pinoy Overflow! 
+### We're excited to introduce you the Pinoy Overflow! 
 It's not just a website; it's a community-driven platform designed to empower newcomers to the world of web development. Pinoy Overflow serves as a "Stack Overflow" for those seeking answers and guidance in their web development journey.
 
 ![1](https://github.com/jerommiole/pinoy-overflow/assets/8807678/97caec4b-5fc1-4abe-9aed-1c3114ba5cfa)
