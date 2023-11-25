@@ -14,7 +14,7 @@ git clone https://github.com/[username]/pinoy-overflow.git
 
 ### 2. Setup your env:
 
-rename .env.example => .env.local from your root directory and supply the necessary values
+rename .env.setupApiKeys => .env.local from your root directory and supply the necessary values
 
 ### 4. Create a New Branch:
 
