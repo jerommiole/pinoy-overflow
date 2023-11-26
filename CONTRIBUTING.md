@@ -12,7 +12,7 @@ Clone the repository to your local machine using the following command (replace 
 git clone https://github.com/[username]/pinoy-overflow.git
 ```
 
-### 2. Setup your env:
+### 3. Setup your env:
 
 rename .env.setupApiKeys => .env.local from your root directory and supply the necessary values
 
