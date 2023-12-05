@@ -80,7 +80,7 @@ const Page = async ({ params, searchParams }: any) => {
               userId={user?._id.toString()}
               upvotes={result.upvotes.map((id) => id.toString())}
               downvotes={result.downvotes.map((id) => id.toString())}
-              hasSaved={user?.saved.includes(result._id)}
+              saved={user?.saved.map((id) => id.toString())}
             />
           </div>
         </div>

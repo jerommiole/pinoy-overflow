@@ -5,21 +5,21 @@ import {
   downvoteQuestion,
   upvoteQuestion,
 } from "@/lib/actions/question.action";
-import { formatAndDivideNumber } from "@/lib/utils";
+import { cn, formatAndDivideNumber } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { downvoteAnswer, upvoteAnswer } from "@/lib/actions/answer.action";
 import { toggleSaveQuestion } from "@/lib/actions/user.action";
-import { useEffect } from "react";
+import { useEffect, useOptimistic } from "react";
 import { viewQuestion } from "@/lib/actions/interaction.action";
 import { toast } from "../ui/use-toast";
 
 interface Props {
-  type: string;
+  type: "Answer" | "Question";
   itemId: string;
   userId?: string;
   upvotes: string[];
   downvotes: string[];
-  hasSaved?: boolean;
+  saved?: string[];
 }
 
 const Votes = ({
@@ -28,13 +28,40 @@ const Votes = ({
   userId,
   upvotes,
   downvotes,
-  hasSaved,
+  saved = [],
 }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
 
-  const hasUpVoted = userId ? upvotes.includes(userId) : false;
-  const hasDownVoted = userId ? downvotes.includes(userId) : false;
+  const [optimisticUpVotes, addOptimisticUpVotes] = useOptimistic<
+    string[],
+    string
+  >(upvotes, (state, newUserId) =>
+    state.includes(newUserId)
+      ? state.filter((id) => id !== newUserId)
+      : [...state, newUserId]
+  );
+
+  const [optimisticDownVotes, addOptimisticDownVotes] = useOptimistic<
+    string[],
+    string
+  >(downvotes, (state, newUserId) =>
+    state.includes(newUserId)
+      ? state.filter((id) => id !== newUserId)
+      : [...state, newUserId]
+  );
+
+  const [optimisticSaved, addOptimisticSaved] = useOptimistic<string[], string>(
+    saved,
+    (state, newUserId) =>
+      state.includes(newUserId)
+        ? state.filter((id) => id !== newUserId)
+        : [...state, newUserId]
+  );
+
+  const hasUpVoted = userId ? optimisticUpVotes.includes(userId) : false;
+  const hasDownVoted = userId ? optimisticDownVotes.includes(userId) : false;
+  const hasSaved = userId ? optimisticSaved.includes(itemId) : false;
 
   const handleSave = async () => {
     if (!userId) {
@@ -44,6 +71,7 @@ const Votes = ({
       });
     }
 
+    addOptimisticSaved(itemId);
     await toggleSaveQuestion({
       userId,
       questionId: itemId,
@@ -67,6 +95,7 @@ const Votes = ({
     }
 
     if (action === "upvote") {
+      addOptimisticUpVotes(userId);
       if (type === "Question") {
         await upvoteQuestion({
           questionId: itemId,
@@ -92,6 +121,7 @@ const Votes = ({
     }
 
     if (action === "downvote") {
+      addOptimisticDownVotes(userId);
       if (type === "Question") {
         await downvoteQuestion({
           questionId: itemId,
@@ -128,18 +158,22 @@ const Votes = ({
     <div className="flex gap-5">
       <div className="flex-center gap-2.5">
         <div className="flex-center gap-1.5">
-          <Image
-            src={
-              hasUpVoted
-                ? "/assets/icons/upvoted.svg"
-                : "/assets/icons/upvote.svg"
-            }
-            width={18}
-            height={18}
-            alt="upvote"
-            className="cursor-pointer"
-            onClick={() => handleVote("upvote")}
-          />
+          <button onClick={() => handleVote("upvote")}>
+            <Image
+              src="/assets/icons/upvote.svg"
+              width={18}
+              height={18}
+              alt="upvote"
+              className={cn("block", hasUpVoted && "hidden")}
+            />
+            <Image
+              src="/assets/icons/upvoted.svg"
+              width={18}
+              height={18}
+              alt="upvoted"
+              className={cn("hidden", hasUpVoted && "block")}
+            />
+          </button>
 
           <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
             <p className="subtle-medium">
@@ -147,18 +181,22 @@ const Votes = ({
             </p>
           </div>
 
-          <Image
-            src={
-              hasDownVoted
-                ? "/assets/icons/downvoted.svg"
-                : "/assets/icons/downvote.svg"
-            }
-            width={18}
-            height={18}
-            alt="downvote"
-            className="cursor-pointer"
-            onClick={() => handleVote("downvote")}
-          />
+          <button onClick={() => handleVote("downvote")}>
+            <Image
+              src="/assets/icons/downvote.svg"
+              width={18}
+              height={18}
+              alt="downvote"
+              className={cn("hidden", hasDownVoted && "block")}
+            />
+            <Image
+              src="/assets/icons/downvoted.svg"
+              width={18}
+              height={18}
+              alt="downvoted"
+              className={cn("block", hasDownVoted && "hidden")}
+            />
+          </button>
 
           <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
             <p className="subtle-medium">
@@ -169,18 +207,22 @@ const Votes = ({
       </div>
 
       {type === "Question" && (
-        <Image
-          src={
-            hasSaved
-              ? "/assets/icons/star-filled.svg"
-              : "/assets/icons/star-red.svg"
-          }
-          width={18}
-          height={18}
-          alt="star"
-          className="cursor-pointer"
-          onClick={handleSave}
-        />
+        <button onClick={handleSave}>
+          <Image
+            src="/assets/icons/star-red.svg"
+            width={18}
+            height={18}
+            alt="save"
+            className={cn("block", hasSaved && "hidden")}
+          />
+          <Image
+            src="/assets/icons/star-filled.svg"
+            width={18}
+            height={18}
+            alt="saved"
+            className={cn("hidden", hasSaved && "block")}
+          />
+        </button>
       )}
     </div>
   );
