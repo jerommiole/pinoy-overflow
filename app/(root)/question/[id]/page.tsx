@@ -8,6 +8,7 @@ import { getQuestionById } from "@/lib/actions/question.action";
 import { getUserById } from "@/lib/actions/user.action";
 import { formatAndDivideNumber, getTimestamp } from "@/lib/utils";
 import { auth } from "@clerk/nextjs";
+import { Types } from "mongoose";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -17,16 +18,41 @@ export const metadata: Metadata = {
   title: "Question | Pinoy Overflow",
 };
 
+interface User {
+  _id: Types.ObjectId;
+  clerkId: string;
+  name: string;
+  username: string;
+  email: string;
+  picture: string;
+  reputation: number;
+  saved: Types.ObjectId[];
+  joinedAt: Date;
+}
+
+interface Question {
+  _id: Types.ObjectId;
+  title: string;
+  content: string;
+  tags: { _id: Types.ObjectId; name: string }[];
+  views: number;
+  upvotes: Types.ObjectId[];
+  downvotes: Types.ObjectId[];
+  author: User;
+  answers: [];
+  createdAt: Date;
+}
+
 const Page = async ({ params, searchParams }: any) => {
   const { userId: clerkId } = auth();
 
-  let mongoUser;
+  let user;
 
   if (clerkId) {
-    mongoUser = await getUserById({ userId: clerkId });
+    user = (await getUserById({ userId: clerkId })) as User;
   }
 
-  const result = await getQuestionById({ questionId: params.id });
+  const result: Question = await getQuestionById({ questionId: params.id });
 
   return (
     <>
@@ -50,13 +76,11 @@ const Page = async ({ params, searchParams }: any) => {
           <div className="flex justify-end">
             <Votes
               type="Question"
-              itemId={JSON.stringify(result._id)}
-              userId={JSON.stringify(mongoUser._id)}
-              upvotes={result.upvotes.length}
-              hasupVoted={result.upvotes.includes(mongoUser._id)}
-              downvotes={result.downvotes.length}
-              hasdownVoted={result.downvotes.includes(mongoUser._id)}
-              hasSaved={mongoUser?.saved.includes(result._id)}
+              itemId={result._id.toString()}
+              userId={user?._id.toString()}
+              upvotes={result.upvotes.map((id) => id.toString())}
+              downvotes={result.downvotes.map((id) => id.toString())}
+              hasSaved={user?.saved.includes(result._id)}
             />
           </div>
         </div>
@@ -103,8 +127,8 @@ const Page = async ({ params, searchParams }: any) => {
       </div>
 
       <AllAnswers
-        questionId={result._id}
-        userId={mongoUser._id}
+        questionId={result._id.toString()}
+        userId={user?._id.toString()}
         totalAnswers={result.answers.length}
         page={searchParams.page}
         filter={searchParams.filter}
@@ -112,8 +136,8 @@ const Page = async ({ params, searchParams }: any) => {
 
       <Answer
         question={result.content}
-        questionId={JSON.stringify(result._id)}
-        authorId={JSON.stringify(mongoUser._id)}
+        questionId={result._id.toString()}
+        authorId={user?._id.toString()}
       />
     </>
   );

@@ -22,7 +22,7 @@ import { usePathname } from "next/navigation";
 interface Props {
   question: string;
   questionId: string;
-  authorId: string;
+  authorId?: string;
 }
 
 const Answer = ({ question, questionId, authorId }: Props) => {
