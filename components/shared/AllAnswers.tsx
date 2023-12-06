@@ -8,6 +8,7 @@ import Image from "next/image";
 import ParseHTML from "./ParseHTML";
 import Votes from "./Votes";
 import Pagination from "./Pagination";
+import { Types } from "mongoose";
 
 interface Props {
   questionId: string;
@@ -17,6 +18,22 @@ interface Props {
   filter?: string;
 }
 
+interface Author {
+  _id: Types.ObjectId;
+  clerkId: string;
+  name: string;
+  picture: string;
+}
+interface Answer {
+  _id: Types.ObjectId;
+  author: Author;
+  question: Types.ObjectId;
+  content: string;
+  upvotes: string[];
+  downvotes: string[];
+  createdAt: Date;
+}
+
 const AllAnswers = async ({
   questionId,
   userId,
@@ -24,11 +41,11 @@ const AllAnswers = async ({
   page,
   filter,
 }: Props) => {
-  const result = await getAnswers({
+  const result = (await getAnswers({
     questionId,
     page: page ? +page : 1,
     sortBy: filter,
-  });
+  })) as { isNextAnswer: boolean; answers: Answer[] };
 
   return (
     <div className="mt-11">
@@ -38,8 +55,11 @@ const AllAnswers = async ({
       </div>
 
       <div>
-        {result?.answers.map((answer: any) => (
-          <article key={answer._id} className="light-border border-b py-10">
+        {result.answers.map((answer) => (
+          <article
+            key={answer._id.toString()}
+            className="light-border border-b py-10"
+          >
             <div className="mb-8 flex flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
               <Link
                 href={`/profile/${answer.author.clerkId}`}
