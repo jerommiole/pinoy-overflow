@@ -22,6 +22,16 @@ interface Props {
   saved?: string[];
 }
 
+type OptimisticVoteState = {
+  downvotes: string[];
+  upvotes: string[];
+};
+
+type OptimisticVote = {
+  type: "upvote" | "downvote";
+  userId: string;
+};
+
 const Votes = ({
   type,
   itemId,
@@ -33,34 +43,46 @@ const Votes = ({
   const pathname = usePathname();
   const router = useRouter();
 
-  const [optimisticUpVotes, addOptimisticUpVotes] = useOptimistic<
-    string[],
-    string
-  >(upvotes, (state, newUserId) =>
-    state.includes(newUserId)
-      ? state.filter((id) => id !== newUserId)
-      : [...state, newUserId]
-  );
+  const [optimisticVotes, addOptimisticVotes] = useOptimistic<
+    OptimisticVoteState,
+    OptimisticVote
+  >({ downvotes, upvotes }, (state, { type, userId }) => {
+    if (type === "upvote") {
+      if (state.upvotes.includes(userId))
+        return {
+          ...state,
+          upvotes: state.upvotes.filter((id) => id !== userId),
+        };
+      return {
+        upvotes: [...state.upvotes, userId],
+        downvotes: state.downvotes.filter((id) => id !== userId),
+      };
+    }
 
-  const [optimisticDownVotes, addOptimisticDownVotes] = useOptimistic<
-    string[],
-    string
-  >(downvotes, (state, newUserId) =>
-    state.includes(newUserId)
-      ? state.filter((id) => id !== newUserId)
-      : [...state, newUserId]
-  );
+    if (state.downvotes.includes(userId))
+      return {
+        ...state,
+        downvotes: state.downvotes.filter((id) => id !== userId),
+      };
+
+    return {
+      upvotes: state.upvotes.filter((id) => id !== userId),
+      downvotes: [...state.downvotes, userId],
+    };
+  });
 
   const [optimisticSaved, addOptimisticSaved] = useOptimistic<string[], string>(
     saved,
-    (state, newUserId) =>
-      state.includes(newUserId)
-        ? state.filter((id) => id !== newUserId)
-        : [...state, newUserId]
+    (state, questionId) =>
+      state.includes(questionId)
+        ? state.filter((id) => id !== questionId)
+        : [...state, questionId]
   );
 
-  const hasUpVoted = userId ? optimisticUpVotes.includes(userId) : false;
-  const hasDownVoted = userId ? optimisticDownVotes.includes(userId) : false;
+  const hasUpVoted = userId ? optimisticVotes.upvotes.includes(userId) : false;
+  const hasDownVoted = userId
+    ? optimisticVotes.downvotes.includes(userId)
+    : false;
   const hasSaved = userId ? optimisticSaved.includes(itemId) : false;
 
   const handleSave = async () => {
@@ -95,7 +117,7 @@ const Votes = ({
     }
 
     if (action === "upvote") {
-      addOptimisticUpVotes(userId);
+      addOptimisticVotes({ type: "upvote", userId });
       if (type === "Question") {
         await upvoteQuestion({
           questionId: itemId,
@@ -121,7 +143,7 @@ const Votes = ({
     }
 
     if (action === "downvote") {
-      addOptimisticDownVotes(userId);
+      addOptimisticVotes({ type: "downvote", userId });
       if (type === "Question") {
         await downvoteQuestion({
           questionId: itemId,
@@ -141,8 +163,8 @@ const Votes = ({
       }
 
       return toast({
-        title: `Downvote ${!hasUpVoted ? "Successful" : "Removed"}`,
-        variant: !hasUpVoted ? "default" : "destructive",
+        title: `Downvote ${!hasDownVoted ? "Successful" : "Removed"}`,
+        variant: !hasDownVoted ? "default" : "destructive",
       });
     }
   };
@@ -174,10 +196,9 @@ const Votes = ({
               className={cn("hidden", hasUpVoted && "block")}
             />
           </button>
-
           <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
             <p className="subtle-medium">
-              {formatAndDivideNumber(upvotes.length)}
+              {formatAndDivideNumber(optimisticVotes.upvotes.length)}
             </p>
           </div>
 
@@ -187,20 +208,20 @@ const Votes = ({
               width={18}
               height={18}
               alt="downvote"
-              className={cn("hidden", hasDownVoted && "block")}
+              className={cn("block", hasDownVoted && "hidden")}
             />
             <Image
               src="/assets/icons/downvoted.svg"
               width={18}
               height={18}
               alt="downvoted"
-              className={cn("block", hasDownVoted && "hidden")}
+              className={cn("hidden", hasDownVoted && "block")}
             />
           </button>
 
           <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
             <p className="subtle-medium">
-              {formatAndDivideNumber(downvotes.length)}
+              {formatAndDivideNumber(optimisticVotes.downvotes.length)}
             </p>
           </div>
         </div>
