@@ -8,13 +8,30 @@ import Image from "next/image";
 import ParseHTML from "./ParseHTML";
 import Votes from "./Votes";
 import Pagination from "./Pagination";
+import { Types } from "mongoose";
 
 interface Props {
   questionId: string;
-  userId: string;
+  userId?: string;
   totalAnswers: number;
   page?: number;
   filter?: string;
+}
+
+interface Author {
+  _id: Types.ObjectId;
+  clerkId: string;
+  name: string;
+  picture: string;
+}
+interface Answer {
+  _id: Types.ObjectId;
+  author: Author;
+  question: Types.ObjectId;
+  content: string;
+  upvotes: string[];
+  downvotes: string[];
+  createdAt: Date;
 }
 
 const AllAnswers = async ({
@@ -24,11 +41,11 @@ const AllAnswers = async ({
   page,
   filter,
 }: Props) => {
-  const result = await getAnswers({
+  const result = (await getAnswers({
     questionId,
     page: page ? +page : 1,
     sortBy: filter,
-  });
+  })) as { isNextAnswer: boolean; answers: Answer[] };
 
   return (
     <div className="mt-11">
@@ -38,8 +55,11 @@ const AllAnswers = async ({
       </div>
 
       <div>
-        {result?.answers.map((answer: any) => (
-          <article key={answer._id} className="light-border border-b py-10">
+        {result.answers.map((answer) => (
+          <article
+            key={answer._id.toString()}
+            className="light-border border-b py-10"
+          >
             <div className="mb-8 flex flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
               <Link
                 href={`/profile/${answer.author.clerkId}`}
@@ -65,12 +85,10 @@ const AllAnswers = async ({
               <div className="flex justify-end">
                 <Votes
                   type="Answer"
-                  itemId={JSON.stringify(answer._id)}
-                  userId={JSON.stringify(userId)}
-                  upvotes={answer.upvotes.length}
-                  hasupVoted={answer.upvotes.includes(userId)}
-                  downvotes={answer.downvotes.length}
-                  hasdownVoted={answer.downvotes.includes(userId)}
+                  itemId={answer._id.toString()}
+                  userId={userId?.toString()}
+                  upvotes={answer.upvotes.map((id) => id.toString())}
+                  downvotes={answer.downvotes.map((id) => id.toString())}
                 />
               </div>
             </div>

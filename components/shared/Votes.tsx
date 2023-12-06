@@ -5,42 +5,98 @@ import {
   downvoteQuestion,
   upvoteQuestion,
 } from "@/lib/actions/question.action";
-import { formatAndDivideNumber } from "@/lib/utils";
+import { cn, formatAndDivideNumber } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
 import { downvoteAnswer, upvoteAnswer } from "@/lib/actions/answer.action";
 import { toggleSaveQuestion } from "@/lib/actions/user.action";
-import { useEffect } from "react";
+import { useEffect, useOptimistic } from "react";
 import { viewQuestion } from "@/lib/actions/interaction.action";
 import { toast } from "../ui/use-toast";
 
 interface Props {
-  type: string;
+  type: "Answer" | "Question";
   itemId: string;
-  userId: string;
-  upvotes: number;
-  hasupVoted: boolean;
-  downvotes: number;
-  hasdownVoted: boolean;
-  hasSaved?: boolean;
+  userId?: string;
+  upvotes: string[];
+  downvotes: string[];
+  saved?: string[];
 }
+
+type OptimisticVoteState = {
+  downvotes: string[];
+  upvotes: string[];
+};
+
+type OptimisticVote = {
+  type: "upvote" | "downvote";
+  userId: string;
+};
 
 const Votes = ({
   type,
   itemId,
   userId,
   upvotes,
-  hasupVoted,
   downvotes,
-  hasdownVoted,
-  hasSaved,
+  saved = [],
 }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [optimisticVotes, addOptimisticVotes] = useOptimistic<
+    OptimisticVoteState,
+    OptimisticVote
+  >({ downvotes, upvotes }, (state, { type, userId }) => {
+    if (type === "upvote") {
+      if (state.upvotes.includes(userId))
+        return {
+          ...state,
+          upvotes: state.upvotes.filter((id) => id !== userId),
+        };
+      return {
+        upvotes: [...state.upvotes, userId],
+        downvotes: state.downvotes.filter((id) => id !== userId),
+      };
+    }
+
+    if (state.downvotes.includes(userId))
+      return {
+        ...state,
+        downvotes: state.downvotes.filter((id) => id !== userId),
+      };
+
+    return {
+      upvotes: state.upvotes.filter((id) => id !== userId),
+      downvotes: [...state.downvotes, userId],
+    };
+  });
+
+  const [optimisticSaved, addOptimisticSaved] = useOptimistic<string[], string>(
+    saved,
+    (state, questionId) =>
+      state.includes(questionId)
+        ? state.filter((id) => id !== questionId)
+        : [...state, questionId]
+  );
+
+  const hasUpVoted = userId ? optimisticVotes.upvotes.includes(userId) : false;
+  const hasDownVoted = userId
+    ? optimisticVotes.downvotes.includes(userId)
+    : false;
+  const hasSaved = userId ? optimisticSaved.includes(itemId) : false;
+
   const handleSave = async () => {
+    if (!userId) {
+      return toast({
+        title: "Please log in",
+        description: "You need to log in to vote",
+      });
+    }
+
+    addOptimisticSaved(itemId);
     await toggleSaveQuestion({
-      userId: JSON.parse(userId),
-      questionId: JSON.parse(itemId),
+      userId,
+      questionId: itemId,
       path: pathname,
     });
 
@@ -48,7 +104,7 @@ const Votes = ({
       title: `Question ${
         !hasSaved ? "Saved in" : "Removed from"
       } your collection`,
-      variant: !hasupVoted ? "default" : "destructive",
+      variant: !hasUpVoted ? "default" : "destructive",
     });
   };
 
@@ -61,60 +117,62 @@ const Votes = ({
     }
 
     if (action === "upvote") {
+      addOptimisticVotes({ type: "upvote", userId });
       if (type === "Question") {
         await upvoteQuestion({
-          questionId: JSON.parse(itemId),
-          userId: JSON.parse(userId),
-          hasupVoted,
-          hasdownVoted,
+          questionId: itemId,
+          userId,
+          hasupVoted: hasUpVoted,
+          hasdownVoted: hasDownVoted,
           path: pathname,
         });
       } else if (type === "Answer") {
         await upvoteAnswer({
-          answerId: JSON.parse(itemId),
-          userId: JSON.parse(userId),
-          hasupVoted,
-          hasdownVoted,
+          answerId: itemId,
+          userId,
+          hasupVoted: hasUpVoted,
+          hasdownVoted: hasDownVoted,
           path: pathname,
         });
       }
 
       return toast({
-        title: `Upvote ${!hasupVoted ? "Successful" : "Removed"}`,
-        variant: !hasupVoted ? "default" : "destructive",
+        title: `Upvote ${!hasUpVoted ? "Successful" : "Removed"}`,
+        variant: !hasUpVoted ? "default" : "destructive",
       });
     }
 
     if (action === "downvote") {
+      addOptimisticVotes({ type: "downvote", userId });
       if (type === "Question") {
         await downvoteQuestion({
-          questionId: JSON.parse(itemId),
-          userId: JSON.parse(userId),
-          hasupVoted,
-          hasdownVoted,
+          questionId: itemId,
+          userId,
+          hasupVoted: hasUpVoted,
+          hasdownVoted: hasDownVoted,
           path: pathname,
         });
       } else if (type === "Answer") {
         await downvoteAnswer({
-          answerId: JSON.parse(itemId),
-          userId: JSON.parse(userId),
-          hasupVoted,
-          hasdownVoted,
+          answerId: itemId,
+          userId,
+          hasupVoted: hasUpVoted,
+          hasdownVoted: hasDownVoted,
           path: pathname,
         });
       }
 
       return toast({
-        title: `Downvote ${!hasupVoted ? "Successful" : "Removed"}`,
-        variant: !hasupVoted ? "default" : "destructive",
+        title: `Downvote ${!hasDownVoted ? "Successful" : "Removed"}`,
+        variant: !hasDownVoted ? "default" : "destructive",
       });
     }
   };
 
   useEffect(() => {
     viewQuestion({
-      questionId: JSON.parse(itemId),
-      userId: userId ? JSON.parse(userId) : undefined,
+      questionId: itemId,
+      userId,
     });
   }, [itemId, userId, pathname, router]);
 
@@ -122,55 +180,70 @@ const Votes = ({
     <div className="flex gap-5">
       <div className="flex-center gap-2.5">
         <div className="flex-center gap-1.5">
-          <Image
-            src={
-              hasupVoted
-                ? "/assets/icons/upvoted.svg"
-                : "/assets/icons/upvote.svg"
-            }
-            width={18}
-            height={18}
-            alt="upvote"
-            className="cursor-pointer"
-            onClick={() => handleVote("upvote")}
-          />
-
+          <button onClick={() => handleVote("upvote")}>
+            <Image
+              src="/assets/icons/upvote.svg"
+              width={18}
+              height={18}
+              alt="upvote"
+              className={cn("block", hasUpVoted && "hidden")}
+            />
+            <Image
+              src="/assets/icons/upvoted.svg"
+              width={18}
+              height={18}
+              alt="upvoted"
+              className={cn("hidden", hasUpVoted && "block")}
+            />
+          </button>
           <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
-            <p className="subtle-medium">{formatAndDivideNumber(upvotes)}</p>
+            <p className="subtle-medium">
+              {formatAndDivideNumber(optimisticVotes.upvotes.length)}
+            </p>
           </div>
 
-          <Image
-            src={
-              hasdownVoted
-                ? "/assets/icons/downvoted.svg"
-                : "/assets/icons/downvote.svg"
-            }
-            width={18}
-            height={18}
-            alt="downvote"
-            className="cursor-pointer"
-            onClick={() => handleVote("downvote")}
-          />
+          <button onClick={() => handleVote("downvote")}>
+            <Image
+              src="/assets/icons/downvote.svg"
+              width={18}
+              height={18}
+              alt="downvote"
+              className={cn("block", hasDownVoted && "hidden")}
+            />
+            <Image
+              src="/assets/icons/downvoted.svg"
+              width={18}
+              height={18}
+              alt="downvoted"
+              className={cn("hidden", hasDownVoted && "block")}
+            />
+          </button>
 
           <div className="flex-center background-light700_dark400 min-w-[18px] rounded-sm p-1">
-            <p className="subtle-medium">{formatAndDivideNumber(downvotes)}</p>
+            <p className="subtle-medium">
+              {formatAndDivideNumber(optimisticVotes.downvotes.length)}
+            </p>
           </div>
         </div>
       </div>
 
       {type === "Question" && (
-        <Image
-          src={
-            hasSaved
-              ? "/assets/icons/star-filled.svg"
-              : "/assets/icons/star-red.svg"
-          }
-          width={18}
-          height={18}
-          alt="star"
-          className="cursor-pointer"
-          onClick={handleSave}
-        />
+        <button onClick={handleSave}>
+          <Image
+            src="/assets/icons/star-red.svg"
+            width={18}
+            height={18}
+            alt="save"
+            className={cn("block", hasSaved && "hidden")}
+          />
+          <Image
+            src="/assets/icons/star-filled.svg"
+            width={18}
+            height={18}
+            alt="saved"
+            className={cn("hidden", hasSaved && "block")}
+          />
+        </button>
       )}
     </div>
   );

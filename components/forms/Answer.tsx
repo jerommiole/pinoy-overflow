@@ -18,11 +18,12 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import { createAnswer } from "@/lib/actions/answer.action";
 import { usePathname } from "next/navigation";
+import { toast } from "../ui/use-toast";
 
 interface Props {
   question: string;
   questionId: string;
-  authorId: string;
+  authorId?: string;
 }
 
 const Answer = ({ question, questionId, authorId }: Props) => {
@@ -43,11 +44,18 @@ const Answer = ({ question, questionId, authorId }: Props) => {
   const handleCreateAnswer = async (values: z.infer<typeof AnswerSchema>) => {
     setIsSubmitting(true);
 
+    if (!authorId) {
+      return toast({
+        title: "Please log in",
+        description: "You need to log in to vote",
+      });
+    }
+
     try {
       await createAnswer({
         content: values.answer,
-        author: JSON.parse(authorId),
-        question: JSON.parse(questionId),
+        author: authorId,
+        question: questionId,
         path: pathname,
       });
 
