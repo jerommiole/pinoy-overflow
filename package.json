@@ -36,7 +36,7 @@
     "html-react-parser": "^5.0.6",
     "lucide-react": "^0.292.0",
     "mongodb": "^6.3.0",
-    "mongoose": "^8.8.3",
+    "mongoose": "^8.9.5",
     "next": "^14.2.31",
     "postcss": "8.4.31",
     "prismjs": "^1.29.0",
