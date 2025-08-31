@@ -37,7 +37,7 @@
     "lucide-react": "^0.292.0",
     "mongodb": "^6.3.0",
     "mongoose": "^8.9.5",
-    "next": "^14.2.31",
+    "next": "^14.2.32",
     "postcss": "8.4.31",
     "prismjs": "^1.30.0",
     "query-string": "^8.1.0",
